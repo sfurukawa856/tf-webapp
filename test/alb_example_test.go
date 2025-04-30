@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
@@ -13,12 +14,15 @@ func TestAlbExample(t *testing.T) {
 		TerraformDir: "../example/alb",
 	}
 
+	// テストの最後にすべてを後片付け
+	defer terraform.Destroy(t, opts)
+
 	// サンプルをデプロイ
 	terraform.InitAndApply(t, opts)
 
 	// ALBのURLを取得
 	albDnsName := terraform.OutputRequired(t, opts, "alb_dns_name")
-	url := fmt.Sprintf("http://%s", &albDnsName)
+	url := fmt.Sprintf("http://%s", albDnsName)
 
 	// ALBのデフォルトアクションが動作し、404を返すことをテスト
 	expectedStatus := 404
